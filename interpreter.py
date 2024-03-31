@@ -114,7 +114,7 @@ class Interpreter:
 			elif commands_memory[ip] == "!":
 				point_index = memory[i-1]
 
-				ip = title[2]["POINTS"][point_index]["POSITION"]
+				ip = title[1]["POINTS"][point_index]["POSITION"]
 				continue
 			elif commands_memory[ip] == "@":
 				stack.append(memory[i])
