@@ -1,6 +1,5 @@
 class Parser:
-	number_cols = 1000
-	number_rows = 10
+	commands_memory_size = 1000
 
 	execute_direction = "right"
 
@@ -10,62 +9,50 @@ class Parser:
 
 	def parse(self):
 		code = self.code
-		x = 0
-		y = 0
+		ip = 0
 		allies = False
 		allies_cmd = ""
 		point_index = 0
 
 		title = [{
-			"ENTRY_POINT" : []
-		},
-		{
-			"EXECUTE_DIRECTION" : ""
+			"ENTRY_POINT" : 0
 		},
 		{
 			"POINTS" : []
 		}]
 
-		commands_memory = [[0] * Parser.number_cols for i in range(Parser.number_rows)]
+		commands_memory = [0] * Parser.commands_memory_size
 
-		for commands in code:
-			for command in commands:
-				if command == "$":
-					table = {
-						"ENTRY_POINT" : [x, y]
-					}
+		for command in code:
+			if command == "$":
+				table = {
+					"ENTRY_POINT" : ip
+				}
 
-					title[0].update(table)
+				title[0].update(table)
+				continue
+			elif command == "[":
+				allies = True
+				continue
+			elif command != "]" and allies == True:
+				allies_cmd += command
+				continue
+			elif command == "]" and allies == True:
+				allies = False
+				commands_memory[ip] = allies_cmd
+				allies_cmd = ""
+			elif command == "_":
+				table = {
+					"INDEX" : point_index,
+					"POSITION" : ip
+				}
 
-					table = {
-						"EXECUTE_DIRECTION" : Parser.execute_direction
-					}
+				title[1]["POINTS"].append(table)
+				point_index += 1
+				continue
+			else:
+				commands_memory[ip] = command
 
-					title[1].update(table)
-				
-				if command == "[":
-					allies = True
-					continue
-				elif command != "]" and allies == True:
-					allies_cmd += command
-					continue
-				elif command == "]" and allies == True:
-					allies = False
-					commands_memory[y][x] = allies_cmd
-					allies_cmd = ""
-				elif command == "_":
-					table = {
-						"INDEX" : point_index,
-						"POSITION" : [x, y]
-					}
-
-					title[2]["POINTS"].append(table)
-					point_index += 1
-					continue
-				else:
-					commands_memory[y][x] = command
-
-				x += 1
-			y += 1
+			ip += 1
 
 		return title, commands_memory
