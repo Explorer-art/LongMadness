@@ -12,158 +12,127 @@ class Interpreter:
 		title = self.title
 		commands_memory = self.commands_memory
 
-		x = 0
-		y = 0
-
 		ip = 0
+
+		i = 0
 		bp = 0
-		zf = 0
 		cx = 0
 
 		buffer = []
 		stack = []
 		memory = []
 
-		for i in range(Interpreter.stack_size):
-			stack.append(0)
+		stack = [0] * Interpreter.stack_size
+		memory = [0] * Interpreter.memory_size
 
-		for i in range(Interpreter.memory_size):
-			memory.append(0)
+		ip = title[0]["ENTRY_POINT"]
 
-		x = title[0]["ENTRY_POINT"][0]
-		y = title[0]["ENTRY_POINT"][1]
-
-		while y < 1000 and x < 1000:
+		while ip < 1000:
 			if self.debug == True:
-				print(f"[DEBUG] Command: {commands_memory[y][x]}")
+				print(f"[DEBUG] Command: {commands_memory[ip]}")
 
-			if commands_memory[y][x] == "+":
-				memory[ip] += 1
-			elif commands_memory[y][x] == "+!":
-				memory[ip] += memory[stack.pop()]
-			elif commands_memory[y][x] == "-":
-				memory[ip] -= 1
-			elif commands_memory[y][x] == "-!":
-				memory[ip] -= memory[stack.pop()]
-			elif commands_memory[y][x] == "*":
-				memory[ip] = memory[ip] * memory[ip-1]
-			elif commands_memory[y][x] == "*!":
-				memory[ip] = memory[ip] * memory[stack.pop()]
-			elif commands_memory[y][x] == "/":
-				memory[ip] = memory[ip] / memory[ip-1]
-			elif commands_memory[y][x] == "/!":
-				memory[ip] = memory[ip] / memory[stack.pop()]
-			elif commands_memory[y][x] == "^":
-				memory[ip] = memory[ip] ^ memory[ip-1]
-			elif commands_memory[y][x] == "^!":
-				memory[ip] = memory[ip] ^ memory[stack.pop()]
-			elif commands_memory[y][x] == "?":
-				if memory[ip] == memory[ip-1]:
-					zf = 1
+			if commands_memory[ip] == "+":
+				memory[i] += 1
+			elif commands_memory[ip] == "+!":
+				memory[i] += memory[stack.pop()]
+			elif commands_memory[ip] == "-":
+				memory[i] -= 1
+			elif commands_memory[ip] == "-!":
+				memory[i] -= memory[stack.pop()]
+			elif commands_memory[ip] == "*":
+				memory[i] = memory[i] * memory[i-1]
+			elif commands_memory[ip] == "*!":
+				memory[i] = memory[i] * memory[stack.pop()]
+			elif commands_memory[ip] == "/":
+				memory[i] = memory[i] / memory[i-1]
+			elif commands_memory[ip] == "/!":
+				memory[i] = memory[i] / memory[stack.pop()]
+			elif commands_memory[ip] == "^":
+				memory[i] = memory[i] ^ memory[i-1]
+			elif commands_memory[ip] == "^!":
+				memory[i] = memory[i] ^ memory[stack.pop()]
+			elif commands_memory[ip] == "?":
+				if memory[i] == memory[i-1]:
+					memory[i] = 1
 				else:
-					zf = 0
-			elif commands_memory[y][x] == "?!":
-				if memory[ip] == memory[stack.pop()]:
-					zf = 1
+					memory[i] = 0
+			elif commands_memory[ip] == "?!":
+				if memory[i] == memory[stack.pop()]:
+					memory[i] = 1
 				else:
-					zf = 0
-			elif commands_memory[y][x] == ">":
-				ip += 1
-			elif commands_memory[y][x] == "<":
-				ip -= 1
-			elif commands_memory[y][x] == "=":
-				memory[ip] = memory[ip-1]
-			elif commands_memory[y][x] == "=!":
-				memory[stack.pop()] = memory[ip]
-			elif commands_memory[y][x] == "!=":
-				memory[ip] = memory[stack.pop()]
-			elif commands_memory[y][x] == "->":
-				title[1]["EXECUTE_DIRECTION"] = "right"
-				continue
-			elif commands_memory[y][x] == "<-":
-				title[1]["EXECUTE_DIRECTION"] = "left"
-				continue
-			elif commands_memory[y][x] == "^-":
-				title[1]["EXECUTE_DIRECTION"] = "top"
-				continue
-			elif commands_memory[y][x] == "v-":
-				title[1]["EXECUTE_DIRECTION"] = "down"
-				continue
-			elif commands_memory[y][x] == "\\":
-				x = 0
-				y += 1
-				continue
-			elif commands_memory[y][x] == "|":
-				if cx != 0:
-					cx -= 1
+					memory[i] = 0
+			elif commands_memory[ip] == ">":
+				i += 1
+			elif commands_memory[ip] == "<":
+				i -= 1
+			elif commands_memory[ip] == "{":
+				if memory[i] == 0:
+					count = 1
 
-					point_index = memory[ip-1]
+					while count > 0:
+						ip += 1
 
-					x = title[2]["POINTS"][point_index]["POSITION"][0]
-					y = title[2]["POINTS"][point_index]["POSITION"][1]
+						if commands_memory[ip] == "{":
+							count += 1
+						elif commands_memory[ip] == "}":
+							count -= 1
 					continue
-			elif commands_memory[y][x] == "{":
-				if zf == 0:
-					point_index = memory[ip-1]
+			elif commands_memory[ip] == "}":
+				if memory[i] != 0:
+					count = 1
 
-					x = title[2]["POINTS"][point_index]["POSITION"][0]
-					y = title[2]["POINTS"][point_index]["POSITION"][1]
+					while count > 0:
+						ip -= 1
+
+						if commands_memory[ip] == "{":
+							count -= 1
+						elif commands_memory[ip] == "}":
+							count += 1
 					continue
-			elif commands_memory[y][x] == "}":
-				if zf == 1:
-					point_index = memory[ip-1]
-
-					x = title[2]["POINTS"][point_index]["POSITION"][0]
-					y = title[2]["POINTS"][point_index]["POSITION"][1]
-					continue
-			elif commands_memory[y][x] == "!!":
-				string = stack.pop()
-
-				print(string)
-			elif commands_memory[y][x] == "??":
+			elif commands_memory[ip] == "=":
+				memory[i] = memory[i-1]
+			elif commands_memory[ip] == "=!":
+				memory[stack.pop()] = memory[i]
+			elif commands_memory[ip] == "!=":
+				memory[i] = memory[stack.pop()]
+			elif commands_memory[ip] == "??":
 				string = input()
 
 				for char in string:
 					buffer.append(char)
-			elif commands_memory[y][x] == ",":
-				memory[ip] = buffer[bp]
+			elif commands_memory[ip] == ",":
+				memory[i] = buffer[bp]
 				bp += 1
-			elif commands_memory[y][x] == ".":
-				char = memory[ip]
+			elif commands_memory[ip] == ".":
+				char = memory[i]
 
 				print(char, end="")
-			elif commands_memory[y][x] == "!>":
-				memory[ip] = chr(memory[ip])
-			elif commands_memory[y][x] == "+>":
-				memory[ip] = ord(memory[ip])
-			elif commands_memory[y][x] == "!":
-				point_index = memory[ip-1]
+			elif commands_memory[ip] == "~":
+				memory[i] = chr(memory[i])
+			elif commands_memory[ip] == "&":
+				memory[i] = ord(memory[i])
+			elif commands_memory[ip] == "!":
+				point_index = memory[i-1]
 
-				x = title[2]["POINTS"][point_index]["POSITION"][0]
-				y = title[2]["POINTS"][point_index]["POSITION"][1]
+				ip = title[2]["POINTS"][point_index]["POSITION"]
 				continue
-			elif commands_memory[y][x] == "@":
-				stack.append(memory[ip])
+			elif commands_memory[ip] == "@":
+				stack.append(memory[i])
 			elif commands_memory == ":":
-				commands_memory[y][x][ip] = stack.pop()
-			elif commands_memory[y][x] == ",?":
-				memory[ip] = len(buffer)
-			elif commands_memory[y][x] == ":?":
+				commands_memory[ip][i] = stack.pop()
+			elif commands_memory[ip] == ",?":
+				memory[i] = len(buffer)
+			elif commands_memory[ip] == ":?":
 				buffer = []
-			elif commands_memory[y][x] == "::":
+			elif commands_memory[ip] == "::":
 				bp = 0
-			elif commands_memory[y][x] == "!@":
-				cx = memory[ip]
-			elif commands_memory[y][x] == "#":
+			elif commands_memory[ip] == "!@":
+				cx = memory[i]
+			elif commands_memory[ip] == "`":
+				memory[i] = 0
+			elif commands_memory[ip] == "#":
 				exit()
 
-			if title[1]["EXECUTE_DIRECTION"] == "right":
-				x += 1
-			elif title[1]["EXECUTE_DIRECTION"] == "left":
-				x -= 1
-			elif title[1]["EXECUTE_DIRECTION"] == "top":
-				y -= 1
-			elif title[1]["EXECUTE_DIRECTION"] == "down":
-				y += 1
+			ip += 1
 
 		return True, None
