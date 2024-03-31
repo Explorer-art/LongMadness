@@ -4,17 +4,20 @@ class Decoder:
 		self.data = data
 
 	def decode(self):
-		string = ""
-		code = []
+		data = self.data
+		code = ""
 
-		for line in self.data:
+		for line in data:
 			for char in line:
 				if char == ";":
 					break
-				else:
-					string += char
+				elif char == " ":
+					continue
+				elif char == "\t":
+					continue
+				elif char == "\n":
+					continue
 
-			code.append(string)
-			string = ""
+				code += char
 
 		return code
