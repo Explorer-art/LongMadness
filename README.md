@@ -2,5 +2,9 @@
 
 #### Using
 ```
-python LongMadness.py [file]
+python LongMadness.py [OPTIONS] [FILENAME]
+
+OPTIONS:
+-i - Interpret the file
+-c - Compile the file
 ```
